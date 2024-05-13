@@ -17,7 +17,7 @@ namespace CatanCustomServers
         private const string modVersion = "0.0.1";
         private readonly Harmony harmony = new Harmony(modGUID);
         private static CatanCustomServers instance;
-        private CustomClient customClient;
+        internal static CustomClient customClient;
         internal static ManualLogSource logger = BepInEx.Logging.Logger.CreateLogSource(modGUID);
         private void Awake()
         {

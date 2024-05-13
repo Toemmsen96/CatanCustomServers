@@ -2,46 +2,70 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using UnityEngine;
 
-class UDPServer
+class TCPServer
 {
     static void Main(string[] args)
     {
+        Console.Title = "TCP Server";
         // Specify the port number to listen on
         int port = 8888;
 
-        // Create a UDP socket
-        UdpClient udpServer = new UdpClient(port);
-        Console.WriteLine("UDP server started on port " + port);
-
-        try
+        // Create a TCP listener
+        TcpListener tcpListener = new TcpListener(IPAddress.Any, port);
+        tcpListener.Start();
+        Console.WriteLine("TCP server started on port " + port);
+        while (true)
         {
-            while (true)
+            try
             {
-                // Receive UDP datagram from any client
-                IPEndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                byte[] receivedBytes = udpServer.Receive(ref clientEndPoint);
+                while (true)
+                {
+                    // Accept a client connection
+                    TcpClient client = tcpListener.AcceptTcpClient();
+                    Console.WriteLine("Client connected: " + client.Client.RemoteEndPoint);
 
-                // Convert the received bytes to a string
-                string receivedMessage = Encoding.ASCII.GetString(receivedBytes);
+                    while (client.Connected)
+                    {
+                        // Get the network stream for reading/writing
+                        NetworkStream networkStream = client.GetStream();
 
-                // Display the received message and client IP:port
-                Console.WriteLine("Received from client at " + clientEndPoint + ": " + receivedMessage);
+                        // Receive data from the client
+                        byte[] buffer = new byte[1024]; // Buffer to hold received data
+                        int bytesRead = networkStream.Read(buffer, 0, buffer.Length);
+                        string receivedMessage = Encoding.ASCII.GetString(buffer, 0, bytesRead);
 
-                // Optionally, send a response back to the client
-                string responseMessage = "Message received successfully!";
-                byte[] responseBytes = Encoding.ASCII.GetBytes(responseMessage);
-                udpServer.Send(responseBytes, responseBytes.Length, clientEndPoint);
+                        // Display the received message
+                        Console.WriteLine("Received from client " + client.Client.RemoteEndPoint + ": " + receivedMessage);
+
+                        // Process the received message (optional)
+                        string responseMessage = "Message received successfully!"; // Create a response message
+
+                        // Convert the response message to bytes
+                        byte[] responseBytes = Encoding.ASCII.GetBytes(responseMessage);
+
+                        // Send the response back to the client
+                        networkStream.Write(responseBytes, 0, responseBytes.Length);
+                        Console.WriteLine("Sent response to client");
+                    }
+
+
+
+                }
             }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine("An error occurred: " + e.Message);
-        }
-        finally
-        {
-            // Close the UDP socket when done
-            udpServer.Close();
+            catch (Exception e)
+            {
+                Console.WriteLine("An error occurred: " + e.Message+"\n");
+
+            }
+            /*
+            finally
+            {
+                // Stop listening for new clients
+                tcpListener.Stop();
+            }
+            */
         }
     }
 }
