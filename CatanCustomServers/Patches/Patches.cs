@@ -22,7 +22,7 @@ namespace CatanCustomServers.Patches
 {
     internal class Patches
     {
-        internal static NakamaConfig CustomNakamaConfig = NakamaSettings.NakamaConfigDEV;
+        internal static NakamaConfig CustomNakamaConfig = NakamaSettings.NakamaConfigLOCAL;
 
 
         [HarmonyPatch(typeof(GameSparksConnectionTransport), "SendPlayAction")]
