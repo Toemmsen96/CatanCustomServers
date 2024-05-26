@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using HarmonyLib;
 using BepInEx.Logging;
+using Nakama.Core;
 
 namespace CatanCustomServers
 {
@@ -28,6 +29,7 @@ namespace CatanCustomServers
             harmony.PatchAll(typeof(Patches.Patches));
             customClient = new CustomClient();
             logger.LogInfo("CatanCustomServers loaded");
+            logger.LogWarning($"Dev config:\nHost:{NakamaSettings.NakamaConfigDEV.Host}\nPort{NakamaSettings.NakamaConfigDEV.Port}\nScheme:{NakamaSettings.NakamaConfigDEV.Scheme}\nServerKey{NakamaSettings.NakamaConfigDEV.ServerKey}");
 
         }
         private void OnDestroy()

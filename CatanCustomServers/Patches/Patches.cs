@@ -17,10 +17,14 @@ using GameSparks.Core;
 using HarmonyLib;
 using System.Collections.Generic;
 using Catan.Unity.Components;
+using Nakama.Core;
 namespace CatanCustomServers.Patches
 {
     internal class Patches
     {
+        internal static NakamaConfig CustomNakamaConfig = NakamaSettings.NakamaConfigDEV;
+
+
         [HarmonyPatch(typeof(GameSparksConnectionTransport), "SendPlayAction")]
         [HarmonyPostfix]
         private static void LogPlayAction(ref CommonGameState gameState, ref CommonGameActionState action)
@@ -43,6 +47,14 @@ namespace CatanCustomServers.Patches
         {
             CatanCustomServers.logger.LogInfo($"Sending AIGSCT play action: {action}\n\nand GameState: {gameState}");
         }
+        [HarmonyPatch(typeof(NakamaConnection))]
+        [HarmonyPatch(".ctor", new System.Type[] { typeof(NakamaInstance), typeof(INakamaPlatform), typeof(NakamaConfig) })][HarmonyPatch(typeof(NakamaConnection), MethodType.Constructor)]
+        [HarmonyPrefix]
+        private static void LogIntoDEV(ref NakamaConfig config)
+        {
+            config = CustomNakamaConfig;
+            CatanCustomServers.logger.LogInfo($"NakamaConnection initialized: Host: {config.Host} Port: {config.Port} Key: {config.ServerKey}");
+        }
 
         [HarmonyPatch(typeof(ChatCommandController), "HandleMessage")]
         [HarmonyPrefix]
@@ -60,6 +72,39 @@ namespace CatanCustomServers.Patches
             {
                 CatanCustomServers.logger.LogInfo("Connecting to server...");
                 CatanCustomServers.customClient.ConnectToServer();
+                __result = true;
+                return true;
+            }
+            if (args[0] == "/disconnect")
+            {
+                CatanCustomServers.logger.LogInfo("Disconnecting from server...");
+                CatanCustomServers.customClient.CloseConnection();
+                __result = true;
+                return true;
+            }
+
+            if (args[0] == "/setenv")
+            {
+                string env = args[1];
+                switch (env){
+                    case "DEV":
+                        CustomNakamaConfig = NakamaSettings.NakamaConfigDEV;
+                        break;
+                    case "PROD":
+                        CustomNakamaConfig = NakamaSettings.NakamaConfigPROD;
+                        break;
+                    case "LOCAL":
+                        CustomNakamaConfig = NakamaSettings.NakamaConfigLOCAL;
+                        break;
+                    case "QA":
+                        CustomNakamaConfig = NakamaSettings.NakamaConfigQA;
+                        break;
+                    default:
+                        CatanCustomServers.logger.LogWarning("Invalid environment. Use DEV, PROD, LOCAL or QA.");
+                        __result = false;
+                        return true;
+                    }
+                    CatanCustomServers.logger.LogInfo($"Changed environment to {env}");
                 __result = true;
                 return true;
             }
