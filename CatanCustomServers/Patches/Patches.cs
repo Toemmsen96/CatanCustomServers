@@ -18,6 +18,7 @@ using HarmonyLib;
 using System.Collections.Generic;
 using Catan.Unity.Components;
 using Nakama.Core;
+using System;
 namespace CatanCustomServers.Patches
 {
     internal class Patches
@@ -54,6 +55,23 @@ namespace CatanCustomServers.Patches
         {
             config = CustomNakamaConfig;
             CatanCustomServers.logger.LogInfo($"NakamaConnection initialized: Host: {config.Host} Port: {config.Port} Key: {config.ServerKey}");
+        }
+
+        [HarmonyPatch(typeof(NetworkResponseBase), "HasError")]
+        [HarmonyPostfix]
+        private static void LogError(ref bool __result, ref NetworkResponseBase __instance)
+        {
+            if (__result)
+            {
+                CatanCustomServers.logger.LogError($"NetworkResponseBase error: {__instance.Error.Description}");
+            }
+        }
+
+        [HarmonyPatch(typeof(NakamaConnector), "LoginToNakamaWithCredentials")]
+        [HarmonyPrefix]
+        private static void LogLogin(ref string email, ref string password, ref Action<NetworkResponseBase> authenticationCallBack)
+        {
+            CatanCustomServers.logger.LogInfo($"Logging into Nakama with username: {email} and password: {password} Callback {authenticationCallBack.ToString()}");
         }
 
         [HarmonyPatch(typeof(ChatCommandController), "HandleMessage")]
