@@ -25,7 +25,7 @@ namespace CatanCustomServers.Patches
     {
         internal static NakamaConfig CustomNakamaConfig = NakamaSettings.NakamaConfigDEV;
 
-
+        /*
         [HarmonyPatch(typeof(GameSparksConnectionTransport), "SendPlayAction")]
         [HarmonyPostfix]
         private static void LogPlayAction(ref CommonGameState gameState, ref CommonGameActionState action)
@@ -48,6 +48,8 @@ namespace CatanCustomServers.Patches
         {
             CatanCustomServers.logger.LogInfo($"Sending AIGSCT play action: {action}\n\nand GameState: {gameState}");
         }
+        */
+
         [HarmonyPatch(typeof(NakamaConnection))]
         [HarmonyPatch(".ctor", new System.Type[] { typeof(NakamaInstance), typeof(INakamaPlatform), typeof(NakamaConfig) })][HarmonyPatch(typeof(NakamaConnection), MethodType.Constructor)]
         [HarmonyPrefix]
@@ -71,7 +73,7 @@ namespace CatanCustomServers.Patches
         [HarmonyPrefix]
         private static void LogLogin(ref string email, ref string password, ref Action<NetworkResponseBase> authenticationCallBack)
         {
-            CatanCustomServers.logger.LogInfo($"Logging into Nakama with username: {email} and password: {password} Callback {authenticationCallBack.ToString()}");
+            //CatanCustomServers.logger.LogInfo($"Logging into Nakama with username: {email} and password: {password} Callback {authenticationCallBack.ToString()}");
         }
 
         [HarmonyPatch(typeof(ChatCommandController), "HandleMessage")]
