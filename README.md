@@ -1,7 +1,7 @@
 # CatanCustomServers
  Custom Servers Mod for Catan Universe  
  Currently usable as switcher for official Catan Server environments.  
- use /setenv <Environment> when logged in  
+ use /setenv \<Environment\> when logged in  
  Available Options:
  - DEV (default) -> Developer servers  
  - PROD -> Standard production servers
